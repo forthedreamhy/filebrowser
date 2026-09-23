@@ -2,11 +2,11 @@
   <div
     id="previewer"
     @touchmove.prevent.stop
-    @wheel.prevent.stop
+    @wheel="onWheel"
     @mousemove="toggleNavigation"
     @touchstart="toggleNavigation"
   >
-    <header-bar v-if="isPdf || isEpub || isCsv || showNav">
+    <header-bar v-if="showHeader" transparent>
       <action icon="close" :label="$t('buttons.close')" @action="close()" />
       <title>{{ name }}</title>
       <action
@@ -27,6 +27,13 @@
         <action
           :disabled="layoutStore.loading"
           v-if="isCsv && authStore.user?.perm.modify"
+          icon="edit_note"
+          :label="t('buttons.editAsText')"
+          @action="editAsText"
+        />
+        <action
+          :disabled="layoutStore.loading"
+          v-if="isMarkdown && authStore.user?.perm.modify"
           icon="edit_note"
           :label="t('buttons.editAsText')"
           @action="editAsText"
@@ -125,6 +132,11 @@
         >
         </VideoPlayer>
         <object v-else-if="isPdf" class="pdf" :data="previewUrl"></object>
+        <PresentationViewer v-else-if="isPptx" />
+        <WordViewer v-else-if="isDocx" />
+        <SpreadsheetViewer v-else-if="isXlsx" />
+        <ArchiveViewer v-else-if="isArchive" />
+        <MarkdownViewer v-else-if="isMarkdown" />
         <div v-else-if="fileStore.req?.type == 'blob'" class="info">
           <div class="title">
             <i class="material-icons">feedback</i>
@@ -194,8 +206,36 @@ import Action from "@/components/header/Action.vue";
 import ExtendedImage from "@/components/files/ExtendedImage.vue";
 import VideoPlayer from "@/components/files/VideoPlayer.vue";
 import CsvViewer from "@/components/files/CsvViewer.vue";
+// Lazy-loaded so the presentation parsing engine stays out of the main bundle.
+const PresentationViewer = defineAsyncComponent(
+  () => import("@/components/files/PresentationViewer.vue")
+);
+// Lazy-loaded so the word parsing engine stays out of the main bundle.
+const WordViewer = defineAsyncComponent(
+  () => import("@/components/files/WordViewer.vue")
+);
+// Lazy-loaded so the spreadsheet parsing engine stays out of the main bundle.
+const SpreadsheetViewer = defineAsyncComponent(
+  () => import("@/components/files/SpreadsheetViewer.vue")
+);
+// Lazy-loaded so the archive parsing engine stays out of the main bundle.
+const ArchiveViewer = defineAsyncComponent(
+  () => import("@/components/files/ArchiveViewer.vue")
+);
+// Lazy-loaded so the markdown parser stays out of the main bundle.
+const MarkdownViewer = defineAsyncComponent(
+  () => import("@/components/files/MarkdownViewer.vue")
+);
 import { VueReader } from "vue-reader";
-import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+  inject,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { Rendition } from "epubjs";
 import { getTheme } from "@/utils/theme";
@@ -204,6 +244,33 @@ import { useI18n } from "vue-i18n";
 // CSV file size limit for preview (5MB)
 // Prevents browser memory issues with large files
 const CSV_MAX_SIZE = 5 * 1024 * 1024;
+
+// Presentation file size limit for preview (50MB)
+// Prevents browser memory issues with large files
+const PPTX_MAX_SIZE = 50 * 1024 * 1024;
+// Only the OpenXML family goes through the pptx engine; legacy .ppt would
+// require a separately licensed WASM renderer and stays download-only.
+const PPTX_EXTENSIONS = [".pptx", ".ppsx", ".potx", ".pptm", ".ppsm", ".potm"];
+
+// Word document file size limit for preview (50MB)
+// Prevents browser memory issues with large files
+const DOCX_MAX_SIZE = 50 * 1024 * 1024;
+const DOCX_EXTENSIONS = [".docx", ".docm", ".dotx", ".dotm"];
+
+// Spreadsheet file size limit for preview (50MB)
+// Prevents browser memory issues with large files
+const XLSX_MAX_SIZE = 50 * 1024 * 1024;
+const XLSX_EXTENSIONS = [".xlsx", ".xls", ".xlsm", ".xlsb", ".ods"];
+
+// Archive file size limit for preview (50MB)
+// Prevents browser memory issues with large files
+const ARCHIVE_MAX_SIZE = 50 * 1024 * 1024;
+const ARCHIVE_EXTENSIONS = [".zip", ".rar", ".7z", ".tar", ".gz", ".tgz"];
+
+// Markdown file size limit for preview (5MB)
+// Prevents browser memory issues with large files
+const MD_MAX_SIZE = 5 * 1024 * 1024;
+const MD_EXTENSIONS = [".md", ".markdown"];
 
 const location = useStorage("book-progress", 0, undefined, {
   serializer: {
@@ -315,6 +382,56 @@ const isCsv = computed(
     fileStore.req?.extension.toLowerCase() == ".csv" &&
     fileStore.req.size <= CSV_MAX_SIZE
 );
+const isPptx = computed(
+  () =>
+    !!fileStore.req &&
+    PPTX_EXTENSIONS.includes(fileStore.req.extension.toLowerCase()) &&
+    fileStore.req.size <= PPTX_MAX_SIZE
+);
+const isDocx = computed(
+  () =>
+    !!fileStore.req &&
+    DOCX_EXTENSIONS.includes(fileStore.req.extension.toLowerCase()) &&
+    fileStore.req.size <= DOCX_MAX_SIZE
+);
+const isXlsx = computed(
+  () =>
+    !!fileStore.req &&
+    XLSX_EXTENSIONS.includes(fileStore.req.extension.toLowerCase()) &&
+    fileStore.req.size <= XLSX_MAX_SIZE
+);
+const isArchive = computed(
+  () =>
+    !!fileStore.req &&
+    ARCHIVE_EXTENSIONS.includes(fileStore.req.extension.toLowerCase()) &&
+    fileStore.req.size <= ARCHIVE_MAX_SIZE
+);
+const isMarkdown = computed(
+  () =>
+    !!fileStore.req &&
+    MD_EXTENSIONS.includes(fileStore.req.extension.toLowerCase()) &&
+    fileStore.req.size <= MD_MAX_SIZE
+);
+
+// 需要显示顶部 header 的预览类型（透明模式）。
+const showHeader = computed(
+  () =>
+    showNav.value ||
+    isPdf.value ||
+    isEpub.value ||
+    isCsv.value ||
+    isPptx.value ||
+    isDocx.value ||
+    isXlsx.value ||
+    isArchive.value ||
+    isMarkdown.value
+);
+
+// 这些查看器自身会消费方向键/Enter（翻页、表格、压缩包列表等），
+// 不应再被全局的 prev/next 快捷键截断。
+const isInteractiveViewer = computed(
+  () => isPptx.value || isDocx.value || isXlsx.value || isArchive.value
+);
 
 const isResizeEnabled = computed(() => resizePreview);
 
@@ -383,20 +500,19 @@ const key = (event: KeyboardEvent) => {
   if (layoutStore.currentPrompt !== null) {
     return;
   }
-  // When previewing a video, let arrow keys fall through to video.js for
-  // seeking instead of switching to the prev/next file. Enter still advances.
+  // 当查看器自身需要消费键盘事件（视频进度、PPT/Word/Excel/压缩包翻页）
+  // 时，不要把方向键和 Enter 占用来切换文件。
   const isVideo = fileStore.req?.type === "video";
+  const captureNavigation = !isVideo && !isInteractiveViewer.value;
   if (event.which === 13) {
     // enter
-    if (hasNext.value) next();
+    if (captureNavigation && hasNext.value) next();
   } else if (event.which === 39) {
     // right arrow
-    if (isVideo) return;
-    if (hasNext.value) next();
+    if (captureNavigation && hasNext.value) next();
   } else if (event.which === 37) {
     // left arrow
-    if (isVideo) return;
-    if (hasPrevious.value) prev();
+    if (captureNavigation && hasPrevious.value) prev();
   } else if (event.which === 27) {
     // esc
     close();
@@ -492,6 +608,22 @@ const toggleNavigation = throttle(function () {
 const close = () => {
   const uri = url.removeLastDir(route.path) + "/";
   router.push({ path: uri });
+};
+
+const onWheel = (event: WheelEvent) => {
+  // Let document/presentation/spreadsheet/archive/markdown viewers handle
+  // their own scroll; prevent the browser gesture for everything else.
+  if (
+    isPptx.value ||
+    isDocx.value ||
+    isXlsx.value ||
+    isArchive.value ||
+    isMarkdown.value
+  ) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
 };
 
 const download = () => window.open(downloadUrl.value);

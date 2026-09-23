@@ -79,6 +79,10 @@ const currentView = computed(() => {
     fileStore.req.type === "text" ||
     fileStore.req.type === "textImmutable"
   ) {
+    const ext = fileStore.req.extension.toLowerCase();
+    if ((ext === ".md" || ext === ".markdown") && route.query.edit !== "true") {
+      return Preview;
+    }
     return Editor;
   } else {
     return Preview;

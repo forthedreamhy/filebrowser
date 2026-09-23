@@ -1,5 +1,12 @@
 <template>
-  <header>
+  <header
+    :class="{ 'header-transparent': transparent }"
+    :style="
+      transparent
+        ? 'background: transparent !important; color: #fff !important; border-bottom: 0 !important; box-shadow: none !important;'
+        : ''
+    "
+  >
     <img v-if="showLogo" :src="logoURL" alt="File Browser" />
     <Action
       v-if="showMenu"
@@ -46,6 +53,7 @@ import { useI18n } from "vue-i18n";
 defineProps<{
   showLogo?: boolean;
   showMenu?: boolean;
+  transparent?: boolean;
 }>();
 
 const layoutStore = useLayoutStore();
@@ -56,4 +64,26 @@ const { t } = useI18n();
 const ifActionsSlot = computed(() => (slots.actions ? true : false));
 </script>
 
-<style></style>
+<style>
+/* Transparent variant used inside the preview overlay. The preview background
+   is dark, so the header should blend in while keeping icons/title readable. */
+.header-transparent {
+  background: transparent !important;
+  color: #fff !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+.header-transparent > .action i,
+.header-transparent > title {
+  color: #fff !important;
+  text-shadow: 1px 1px 1px #000 !important;
+}
+
+@media (min-width: 738px) {
+  .header-transparent #dropdown .action i {
+    color: #fff !important;
+    text-shadow: 1px 1px 1px #000 !important;
+  }
+}
+</style>
