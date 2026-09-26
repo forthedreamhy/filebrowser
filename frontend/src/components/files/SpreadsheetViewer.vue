@@ -1,6 +1,6 @@
 <template>
-  <div class="spreadsheet-viewer">
-    <div v-if="loadError" class="load-error">
+  <div class="spreadsheet-viewer preview-viewer">
+    <div v-if="loadError" class="preview-load-error">
       <i class="material-icons">error_outline</i>
       <span>{{ loadError }}</span>
     </div>
@@ -45,54 +45,3 @@ const options = computed<FileViewerOptions>(() => ({
   styleIsolation: "none",
 }));
 </script>
-
-<style scoped>
-.spreadsheet-viewer {
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  text-align: left;
-  padding-top: 4em;
-  box-sizing: border-box;
-}
-
-.load-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 0.5em;
-  color: var(--fg);
-}
-
-.load-error i {
-  font-size: 3em;
-}
-</style>
-
-<style>
-.spreadsheet-viewer ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.spreadsheet-viewer ::-webkit-scrollbar-track {
-  background: rgba(128, 128, 128, 0.15);
-  border-radius: 5px;
-}
-
-.spreadsheet-viewer ::-webkit-scrollbar-thumb {
-  background: rgba(128, 128, 128, 0.55);
-  border-radius: 5px;
-}
-
-.spreadsheet-viewer ::-webkit-scrollbar-thumb:hover {
-  background: rgba(128, 128, 128, 0.85);
-}
-
-.spreadsheet-viewer {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(128, 128, 128, 0.55) rgba(128, 128, 128, 0.15);
-}
-</style>

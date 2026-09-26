@@ -20,6 +20,9 @@ importers:
       '@file-viewer/renderer-spreadsheet':
         specifier: ^3.1.2
         version: 3.1.2
+      '@file-viewer/renderer-text':
+        specifier: ^3.1.2
+        version: 3.1.2
       '@file-viewer/renderer-word':
         specifier: ^3.1.2
         version: 3.1.2
@@ -1095,6 +1098,18 @@ packages:
   '@file-viewer/renderer-spreadsheet@3.1.2':
     resolution: {integrity: sha512-NZN2P98QnYDZPmViB0tUjZemLBTrczCoOM3nvoJsZBb5l6oN0/1V5nCt3KXcZrSBcoUSos68IZuUMKci+X2DOg==}
 
+  '@file-viewer/renderer-text@3.1.2':
+    resolution: {integrity: sha512-u8n/+LRB1OMvjmIkJa3iPThykJtev3TiNxM5ilCRNGVxq39pgTftalITs6e0SPSjENGLtZ3iSyfgluWTMA8s5Q==}
+    hasBin: true
+    peerDependencies:
+      xmllint-wasm: 5.3.0
+      xslt-polyfill: 1.0.29
+    peerDependenciesMeta:
+      xmllint-wasm:
+        optional: true
+      xslt-polyfill:
+        optional: true
+
   '@file-viewer/renderer-word@3.1.2':
     resolution: {integrity: sha512-peyLWxrtgRj7spcgA3XtAho1ANFi5CWfpZZhCtGbly0E4bgO2EsxZJLp8Mjp7x6ISdoQO9CwYiQkDUeVGe7WDw==}
 
@@ -1237,6 +1252,11 @@ packages:
   '@pkgr/core@0.2.9':
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
+
+  '@prettier/plugin-xml@3.4.2':
+    resolution: {integrity: sha512-/UyNlHfkuLXG6Ed85KB0WBF283xn2yavR+UtRibBRUcvEJId2DSLdGXwJ/cDa1X++SWDPzq3+GSFniHjkNy7yg==}
+    peerDependencies:
+      prettier: ^3.0.0
 
   '@rolldown/binding-android-arm64@1.0.1':
     resolution: {integrity: sha512-fJI3I0r3C3Oj/zdBCpaCmBRZYf07xpaq4yCfDDoSFm+beWNzbIl26puW8RraUdugoJw/95zerNOn6jasAhzSmg==}
@@ -1853,6 +1873,9 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
+  '@xml-tools/parser@1.0.11':
+    resolution: {integrity: sha512-aKqQ077XnR+oQtHJlrAflaZaL7qZsulWc/i/ZEooar5JiWj1eLt0+Wg28cpa+XLney107wXqneC+oG1IZvxkTA==}
+
   '@xmldom/xmldom@0.7.13':
     resolution: {integrity: sha512-lm2GW5PkosIzccsaZIz7tp8cPADSIlIHWDFTR1N0SzfinhhYgeIQjFMz4rYzanCScr3DqQLeomUDArp6MWKm+g==}
     engines: {node: '>=10.0.0'}
@@ -1973,6 +1996,9 @@ packages:
   chai@6.2.2:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
     engines: {node: '>=18'}
+
+  chevrotain@7.1.1:
+    resolution: {integrity: sha512-wy3mC1x4ye+O+QkEinVJkPf5u2vsrDIYW9G7ZuwFl6v/Yu0LwUuT2POsb+NUWApebyxfkQq6+yDfRExbnI5rcw==}
 
   chokidar@5.0.0:
     resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
@@ -2318,6 +2344,10 @@ packages:
     resolution: {integrity: sha512-ej4AhfhfL2Q2zpMmLo7U1Uv9+PyhIZpgQLGT1F9miIGmiCJIoCgSmczFdrc97mWT4kVY72KA+WnnhJ5pghSvSg==}
     engines: {node: '>= 0.4'}
 
+  highlight.js@11.12.0:
+    resolution: {integrity: sha512-nbfWpyRMcMrPMmDwJB+dhX/eiaPKtc2RB+0QZskqJ3WjRA/FDS0e9hZrx8EC/lbEv8gXy98FcDbNa/dspAaJMg==}
+    engines: {node: '>=12.0.0'}
+
   hookable@5.5.3:
     resolution: {integrity: sha512-Yc+BQe8SvoXH1643Qez1zqLRmbA5rCL+sSmk6TVos0LWVfNIB7PGncdlId77WzLGSIB5KaWgTaNTs2lNVEI6VQ==}
 
@@ -2568,6 +2598,11 @@ packages:
       katex: '>=0.16 <0.17'
       marked: '>=4 <19'
 
+  marked@18.0.14:
+    resolution: {integrity: sha512-mBHK6FBHuBAlhgRe88w9F0O1AbwwXJUcQibUbC/QcdTbVGAD7aWza+xt3N6oT/jCZx3/OMeS+8rnuiHZcQ9s7A==}
+    engines: {node: '>= 20'}
+    hasBin: true
+
   marked@18.0.3:
     resolution: {integrity: sha512-7VT90JOkDeaRWpfjOReRGPEKn0ecdARBkDGL+tT1wZY0efPPqkUxLUSmzy/C7TIylQYJC9STISEsCHrqb/7VIA==}
     engines: {node: '>= 20'}
@@ -2741,6 +2776,11 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+    engines: {node: '>=14'}
+    hasBin: true
+
   pretty-bytes@7.1.0:
     resolution: {integrity: sha512-nODzvTiYVRGRqAOvE84Vk5JDPyyxsVk0/fbA/bq7RqlnhksGpset09XTxbpvLTIjoaF7K8Z8DG8yHtKGTPSYRw==}
     engines: {node: '>=20'}
@@ -2789,6 +2829,9 @@ packages:
 
   regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
+
+  regexp-to-ast@0.5.0:
+    resolution: {integrity: sha512-tlbJqcMHnPKI9zSrystikWKwHkBqu2a/Sgw01h3zFjvYrMxEDYHzzoMZnUrbIfpTFEsoRnnviOXNCzFiSc54Qw==}
 
   regexpu-core@6.4.0:
     resolution: {integrity: sha512-0ghuzq67LI9bLXpOX/ISfve/Mq33a4aFRzoQYhnnok1JOFpmE/A2TBGkNVenOGEeSBCjIiWcc6MVOG5HEQv0sA==}
@@ -4181,6 +4224,15 @@ snapshots:
       tinycolor2: 1.6.0
       utif: 3.1.0
 
+  '@file-viewer/renderer-text@3.1.2':
+    dependencies:
+      '@file-viewer/core': 3.1.2
+      '@prettier/plugin-xml': 3.4.2(prettier@3.9.6)
+      dompurify: 3.4.15
+      highlight.js: 11.12.0
+      marked: 18.0.14
+      prettier: 3.9.6
+
   '@file-viewer/renderer-word@3.1.2':
     dependencies:
       '@file-viewer/core': 3.1.2
@@ -4332,6 +4384,11 @@ snapshots:
   '@oxc-project/types@0.130.0': {}
 
   '@pkgr/core@0.2.9': {}
+
+  '@prettier/plugin-xml@3.4.2(prettier@3.9.6)':
+    dependencies:
+      '@xml-tools/parser': 1.0.11
+      prettier: 3.9.6
 
   '@rolldown/binding-android-arm64@1.0.1':
     optional: true
@@ -4938,6 +4995,10 @@ snapshots:
     dependencies:
       vue: 3.5.34(typescript@5.9.3)
 
+  '@xml-tools/parser@1.0.11':
+    dependencies:
+      chevrotain: 7.1.1
+
   '@xmldom/xmldom@0.7.13': {}
 
   '@xmldom/xmldom@0.8.11': {}
@@ -5053,6 +5114,10 @@ snapshots:
   caniuse-lite@1.0.30001788: {}
 
   chai@6.2.2: {}
+
+  chevrotain@7.1.1:
+    dependencies:
+      regexp-to-ast: 0.5.0
 
   chokidar@5.0.0:
     dependencies:
@@ -5446,6 +5511,8 @@ snapshots:
     dependencies:
       function-bind: 1.1.2
 
+  highlight.js@11.12.0: {}
+
   hookable@5.5.3: {}
 
   ignore@5.3.2: {}
@@ -5660,6 +5727,8 @@ snapshots:
       katex: 0.16.28
       marked: 18.0.3
 
+  marked@18.0.14: {}
+
   marked@18.0.3: {}
 
   marks-pane@1.0.9: {}
@@ -5813,6 +5882,8 @@ snapshots:
 
   prettier@3.8.3: {}
 
+  prettier@3.9.6: {}
+
   pretty-bytes@7.1.0: {}
 
   process-nextick-args@2.0.1: {}
@@ -5856,6 +5927,8 @@ snapshots:
   regenerate@1.4.2: {}
 
   regenerator-runtime@0.14.1: {}
+
+  regexp-to-ast@0.5.0: {}
 
   regexpu-core@6.4.0:
     dependencies:

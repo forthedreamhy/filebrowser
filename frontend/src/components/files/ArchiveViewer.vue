@@ -1,6 +1,6 @@
 <template>
   <div ref="viewerRoot" class="archive-viewer">
-    <div v-if="loadError" class="load-error">
+    <div v-if="loadError" class="preview-load-error">
       <i class="material-icons">error_outline</i>
       <span>{{ loadError }}</span>
     </div>
@@ -26,12 +26,14 @@ import { onMounted, onUnmounted } from "vue";
 import { FileViewer } from "@file-viewer/vue3";
 import "@file-viewer/vue3/dist/file-viewer3.css";
 import archiveRenderer from "@file-viewer/renderer-archive";
+import textRenderer from "@file-viewer/renderer-text";
 import wordRenderer from "@file-viewer/renderer-word";
 import presentationRenderer from "@file-viewer/renderer-presentation";
 import spreadsheetRenderer from "@file-viewer/renderer-spreadsheet";
 
 import type { FileViewerOptions } from "@file-viewer/vue3";
 import { useFileViewerBuffer } from "@/composables/useFileViewerBuffer";
+import { staticURL } from "@/utils/constants";
 import { useI18n } from "vue-i18n";
 
 const { locale } = useI18n();
@@ -84,6 +86,7 @@ const syncEmptyLayout = () => {
 // Compose the archive renderer with office renderers so nested .doc/.docx,
 // .ppt/.pptx, and .xls/.xlsx entries can be previewed inside the archive.
 const renderers = [
+  textRenderer,
   wordRenderer,
   presentationRenderer,
   spreadsheetRenderer,
@@ -104,10 +107,25 @@ const options = computed<FileViewerOptions>(() => ({
   locale: locale.value === "zh-cn" ? "zh-CN" : "en-US",
   fit: "contain",
   styleIsolation: "none",
+  // libarchive.js worker + wasm must be served explicitly: the renderer's
+  // default probe of `vendor/libarchive/worker-bundle.js` hits the SPA
+  // fallback and returns HTML, so pass URLs under the static route where the
+  // Go server actually serves embedded files.
+  archive: {
+    workerUrl: `${staticURL}/vendor/libarchive/worker-bundle.js`,
+    wasmUrl: `${staticURL}/vendor/libarchive/libarchive.wasm`,
+  },
 }));
 
+// The CSS rules below already implement the empty-preview layout wherever
+// :has() is supported; the JS rescanning fallback is only needed elsewhere.
+const supportsHasSelector =
+  typeof CSS !== "undefined" &&
+  typeof CSS.supports === "function" &&
+  CSS.supports("selector(:has(*))");
+
 onMounted(() => {
-  if (!viewerRoot.value) return;
+  if (!viewerRoot.value || supportsHasSelector) return;
 
   emptyObserver = new MutationObserver(() => syncEmptyLayout());
   emptyObserver.observe(viewerRoot.value, { childList: true, subtree: true });
@@ -129,42 +147,9 @@ onUnmounted(() => {
   padding-top: 4em;
   box-sizing: border-box;
 }
-
-.load-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 0.5em;
-  color: var(--fg);
-}
-
-.load-error i {
-  font-size: 3em;
-}
 </style>
 
 <style>
-.archive-viewer ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.archive-viewer ::-webkit-scrollbar-track {
-  background: rgba(128, 128, 128, 0.15);
-  border-radius: 5px;
-}
-
-.archive-viewer ::-webkit-scrollbar-thumb {
-  background: rgba(128, 128, 128, 0.55);
-  border-radius: 5px;
-}
-
-.archive-viewer ::-webkit-scrollbar-thumb:hover {
-  background: rgba(128, 128, 128, 0.85);
-}
-
 .archive-viewer {
   display: flex !important;
   flex-direction: column !important;

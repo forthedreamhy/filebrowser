@@ -248,18 +248,29 @@ const CSV_MAX_SIZE = 5 * 1024 * 1024;
 // Presentation file size limit for preview (50MB)
 // Prevents browser memory issues with large files
 const PPTX_MAX_SIZE = 50 * 1024 * 1024;
-// Only the OpenXML family goes through the pptx engine; legacy .ppt would
-// require a separately licensed WASM renderer and stays download-only.
-const PPTX_EXTENSIONS = [".pptx", ".ppsx", ".potx", ".pptm", ".ppsm", ".potm"];
+// Both the OpenXML engine (.pptx family) and the binary 97-2003 engine
+// (.ppt/.pot) come from @file-viewer/renderer-presentation.
+const PPTX_EXTENSIONS = [
+  ".ppt",
+  ".pot",
+  ".pptx",
+  ".ppsx",
+  ".potx",
+  ".pptm",
+  ".ppsm",
+  ".potm",
+];
 
 // Word document file size limit for preview (50MB)
 // Prevents browser memory issues with large files
+// The renderer handles both the OpenXML family and legacy 97-2003 binary .doc.
 const DOCX_MAX_SIZE = 50 * 1024 * 1024;
-const DOCX_EXTENSIONS = [".docx", ".docm", ".dotx", ".dotm"];
+const DOCX_EXTENSIONS = [".doc", ".dot", ".docx", ".docm", ".dotx", ".dotm"];
 
-// Spreadsheet file size limit for preview (50MB)
-// Prevents browser memory issues with large files
-const XLSX_MAX_SIZE = 50 * 1024 * 1024;
+// Spreadsheet file size limit for preview (100MB).
+// Large workbooks are memory-hungry in the renderer, but 50MB excluded too
+// many real-world files; raise with caution if mobile clients struggle.
+const XLSX_MAX_SIZE = 100 * 1024 * 1024;
 const XLSX_EXTENSIONS = [".xlsx", ".xls", ".xlsm", ".xlsb", ".ods"];
 
 // Archive file size limit for preview (50MB)
@@ -505,8 +516,8 @@ const key = (event: KeyboardEvent) => {
   const isVideo = fileStore.req?.type === "video";
   const captureNavigation = !isVideo && !isInteractiveViewer.value;
   if (event.which === 13) {
-    // enter
-    if (captureNavigation && hasNext.value) next();
+    // enter — 播放器本身不消费 Enter，保留上游“切换到下一个文件”的行为。
+    if ((captureNavigation || isVideo) && hasNext.value) next();
   } else if (event.which === 39) {
     // right arrow
     if (captureNavigation && hasNext.value) next();

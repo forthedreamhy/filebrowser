@@ -80,7 +80,14 @@ const currentView = computed(() => {
     fileStore.req.type === "textImmutable"
   ) {
     const ext = fileStore.req.extension.toLowerCase();
-    if ((ext === ".md" || ext === ".markdown") && route.query.edit !== "true") {
+    // Markdown preview is capped at 5MB (MD_MAX_SIZE in Preview.vue); larger
+    // files — or an explicit edit request — fall back to the source editor
+    // instead of the "no preview available" dead end.
+    if (
+      (ext === ".md" || ext === ".markdown") &&
+      fileStore.req.size <= 5 * 1024 * 1024 &&
+      route.query.edit !== "true"
+    ) {
       return Preview;
     }
     return Editor;

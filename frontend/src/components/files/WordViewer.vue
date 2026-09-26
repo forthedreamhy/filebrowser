@@ -1,8 +1,12 @@
 <template>
-  <div class="word-viewer">
-    <div v-if="loadError" class="load-error">
+  <div class="word-viewer preview-viewer">
+    <div v-if="loadError" class="preview-load-error">
       <i class="material-icons">error_outline</i>
       <span>{{ loadError }}</span>
+    </div>
+    <!-- Word/WPS "另存为网页" 导出的 HTML 伪 .doc,按文档排版渲染。 -->
+    <div v-else-if="htmlDocHtml !== ''" class="html-doc-stage">
+      <div class="html-doc-page" v-html="htmlDocHtml"></div>
     </div>
     <FileViewer
       v-else-if="file !== null"
@@ -28,11 +32,25 @@ import wordRenderer from "@file-viewer/renderer-word";
 
 import type { FileViewerOptions } from "@file-viewer/vue3";
 import { useFileViewerBuffer } from "@/composables/useFileViewerBuffer";
+import {
+  decodeDocumentText,
+  looksLikeHtmlDocument,
+  sanitizeWordExportedHtml,
+} from "@/utils/wordExportedHtml";
 import { getTheme } from "@/utils/theme";
 import { useI18n } from "vue-i18n";
 
 const { locale } = useI18n();
 const { file, loadError, name } = useFileViewerBuffer();
+
+// 以 HTML 形式导出却保留 .doc 扩展名的文件,按净化后的富文本排版展示,
+// 否则交给 OLE 二进制解析器的 FileViewer 正常路径。
+const htmlDocHtml = computed(() => {
+  if (file.value === null || !looksLikeHtmlDocument(file.value)) {
+    return "";
+  }
+  return sanitizeWordExportedHtml(decodeDocumentText(file.value));
+});
 
 // The renderer-word package types its handler against HTMLDivElement, which the
 // renderer input's HTMLElement-based variance rejects; the runtime contract is
@@ -52,59 +70,48 @@ const options = computed<FileViewerOptions>(() => ({
 </script>
 
 <style scoped>
-.word-viewer {
+/* HTML 伪 .doc 的纸张排版:单一白色页面居中,内容按 Word 导出的内联样式呈现。 */
+.html-doc-stage {
   width: 100%;
-  height: 100%;
-  overflow: auto;
-  text-align: left;
-  /* Push the viewer below the app's transparent header bar (4em). */
-  padding-top: 4em;
+  min-height: 100%;
+  padding: 32px 24px 48px;
   box-sizing: border-box;
-}
-
-.load-error {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 100%;
-  gap: 0.5em;
-  color: var(--fg);
 }
 
-.load-error i {
-  font-size: 3em;
-}
-</style>
-
-<!-- 非 scoped:viewer 以 styleIsolation=none 渲染进 light DOM,滚动条才能被覆盖 -->
-<style>
-.word-viewer ::-webkit-scrollbar,
-.presentation-viewer ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.word-viewer ::-webkit-scrollbar-track,
-.presentation-viewer ::-webkit-scrollbar-track {
-  background: rgba(128, 128, 128, 0.15);
-  border-radius: 5px;
+.html-doc-page {
+  width: 100%;
+  max-width: 794px;
+  background: #fff;
+  color: #1f2328;
+  padding: clamp(24px, 7%, 96px) clamp(20px, 6%, 88px);
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box;
+  min-height: 1123px;
+  overflow-wrap: anywhere;
 }
 
-.word-viewer ::-webkit-scrollbar-thumb,
-.presentation-viewer ::-webkit-scrollbar-thumb {
-  background: rgba(128, 128, 128, 0.55);
-  border-radius: 5px;
+.html-doc-page table {
+  width: auto;
+  max-width: 100%;
+  border-collapse: collapse;
 }
 
-.word-viewer ::-webkit-scrollbar-thumb:hover,
-.presentation-viewer ::-webkit-scrollbar-thumb:hover {
-  background: rgba(128, 128, 128, 0.85);
+.html-doc-page td,
+.html-doc-page th {
+  padding: 4px 6px;
+  vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
-.word-viewer,
-.presentation-viewer {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(128, 128, 128, 0.55) rgba(128, 128, 128, 0.15);
+.html-doc-page img {
+  max-width: 100%;
+  height: auto;
 }
 </style>

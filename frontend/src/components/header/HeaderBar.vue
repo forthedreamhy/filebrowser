@@ -1,12 +1,5 @@
 <template>
-  <header
-    :class="{ 'header-transparent': transparent }"
-    :style="
-      transparent
-        ? 'background: transparent !important; color: #fff !important; border-bottom: 0 !important; box-shadow: none !important;'
-        : ''
-    "
-  >
+  <header :class="{ 'header-transparent': transparent }">
     <img v-if="showLogo" :src="logoURL" alt="File Browser" />
     <Action
       v-if="showMenu"
